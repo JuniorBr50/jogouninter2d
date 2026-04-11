@@ -6,11 +6,8 @@ tela=pygame.display.set_mode([840,480])
 #set_caption: nome do jogo
 pygame.display.set_caption('grasi games')
 jogo=True
-def draw():
-    # fill: a cor da sua tela
-    tela.fill([187, 48, 120])
-    jogador = pygame.Rect(400, 300, 100, 100)
-    pygame.draw.rect(tela, [255, 255, 255], jogador)
+eimage = pygame.image.load("controle.jpg")
+
 # if name main : ele é o play,tem q ter
 if __name__ =='__main__':
     print("jogo de jogo")
@@ -28,7 +25,9 @@ if __name__ =='__main__':
         top=pygame.key.get_pressed()
         if top[pygame.K_SPACE]:
             print("tario")
-        draw()
+
+
+        tela.blit(eimage,(5,0))
 
         #update do set_mode
         pygame.display.update()
