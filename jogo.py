@@ -7,6 +7,11 @@ tela=pygame.display.set_mode([840,480])
 pygame.display.set_caption('grasi games')
 jogo=True
 eimage = pygame.image.load("controle.jpg")
+#musica
+pygame.mixer.music.load("som&foto/SuperHero_original.ogg")
+pygame.mixer.music.play(-1)
+#som especiais
+vitoria=pygame.mixer.Sound("som&foto/Victory.wav")
 
 # if name main : ele é o play,tem q ter
 if __name__ =='__main__':
@@ -20,7 +25,7 @@ if __name__ =='__main__':
         #se voce apertar primerio o 'w' vai printar
             elif evento.type==pygame.KEYDOWN:
                 if evento.key==pygame.K_w:
-                    print("jogo de jogo")
+                    vitoria.play()
         #pra pressionar a tecla
         top=pygame.key.get_pressed()
         if top[pygame.K_SPACE]:
