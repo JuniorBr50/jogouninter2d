@@ -24,10 +24,10 @@ if __name__ =='__main__':
         #pra pressionar a tecla
         top=pygame.key.get_pressed()
         if top[pygame.K_SPACE]:
-            print("tario")
+            print("toop")
 
 
-        tela.blit(eimage,(5,0))
+        tela.blit(eimage,(6,9))
 
         #update do set_mode
         pygame.display.update()
