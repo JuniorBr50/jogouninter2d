@@ -24,7 +24,7 @@ if __name__ =='__main__':
         #pra pressionar a tecla
         top=pygame.key.get_pressed()
         if top[pygame.K_SPACE]:
-            print("toop")
+            print("tooop")
 
 
         tela.blit(eimage,(6,9))
