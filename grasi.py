@@ -10,10 +10,14 @@ pygame.mixer.music.load("som&foto/Long Away Home.wav")
 pygame.mixer.music.play(-1)
 WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))  # TEM que vir antes
-
+lanes = [
+    WIDTH//2 - 140,
+    WIDTH//2,
+    WIDTH//2 + 140
+]
 car_img = pygame.image.load("som&foto/car.PNG").convert_alpha()
 car_img = pygame.transform.scale(car_img, (60, 120))
-enemy_img = pygame.image.load("enemy.png").convert_alpha()
+enemy_img = pygame.image.load("som&foto/inimigo.png").convert_alpha()
 enemy_img = pygame.transform.scale(enemy_img, (60, 120))
 
 try:
@@ -39,20 +43,19 @@ ROAD = (50,50,50)
 # Estado global do jogo (permite continuar)
 game_state = {
     "player_x": WIDTH//2,
-    "speed": 10,
+    "speed": 5,
     "distance": 0,
     "enemies": []
 }
 
 def reset_game():
     game_state["player_x"] = WIDTH//2
-    game_state["speed"] = 10
+    game_state["speed"] = 3
     game_state["distance"] = 0
     game_state["enemies"] = []
 
 def spawn_enemy():
-    lane = random.choice([-1, 0, 1])
-    x = WIDTH//2 + lane * 80
+    x = random.choice(lanes)
     game_state["enemies"].append([x, -100])
 
 
@@ -61,7 +64,7 @@ def draw_player():
 
 def draw_enemies():
     for e in game_state["enemies"]:
-        pygame.draw.rect(screen, YELLOW, (e[0]-20, e[1], 40, 80))
+        screen.blit(enemy_img, (e[0]-30, e[1]))
 
 def update_enemies():
     for e in game_state["enemies"]:
@@ -71,9 +74,24 @@ def remove_enemies():
     game_state["enemies"] = [e for e in game_state["enemies"] if e[1] < HEIGHT+100]
 
 def collision():
+    player_rect = pygame.Rect(
+        game_state["player_x"] - 18,  # aumentou lateral
+        HEIGHT - 90,
+        36,  # largura maior
+        60
+    )
+
     for e in game_state["enemies"]:
-        if abs(e[0] - game_state["player_x"]) < 40 and abs(e[1] - (HEIGHT-100)) < 60:
+        enemy_rect = pygame.Rect(
+            e[0] - 18,
+            e[1] + 40,
+            36,
+            60
+        )
+
+        if player_rect.colliderect(enemy_rect):
             return True
+
     return False
 
 def draw_hud():
@@ -85,7 +103,7 @@ def game_loop():
 
     while True:
         clock.tick(60)
-        offset = int(game_state["distance"] % HEIGHT)
+        offset = int((game_state["distance"] * 2) % HEIGHT)
 
         if bg_img:
             screen.blit(bg_img, (0, offset - HEIGHT))
@@ -126,7 +144,7 @@ def game_loop():
         draw_player()
 
         game_state["distance"] += game_state["speed"] * 0.1
-        game_state["speed"] += 0.002
+        game_state["speed"] += 0.006
 
         draw_hud()
 
