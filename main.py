@@ -29,9 +29,21 @@ try:
     fundo_img = pygame.transform.scale(fundo_img, (800, 600))
 except:
     fundo_img = None
+try:
+    fundo_menu = pygame.image.load("som&foto/capa_menu.png").convert()
 
+    # escala mantendo proporção
+    escala = ALTURA / fundo_menu.get_height()
+
+    fundo_menu = pygame.transform.scale(
+        fundo_menu,
+        (int(fundo_menu.get_width() * escala), ALTURA)
+    )
+except:
+    fundo_menu = None
 relogio = pygame.time.Clock()
-fonte = pygame.font.SysFont("Arial", 30)
+fonte = pygame.font.Font("som&foto/Pixel Game.otf", 40)
+fonte_pequena = pygame.font.Font("som&foto/Pixel Game.otf", 25)
 
 BRANCO = (255,255,255)
 PRETO = (0,0,0)
@@ -102,6 +114,8 @@ def loop_jogo():
 
         estado_jogo["distancia"] += estado_jogo["velocidade"] * 0.1
         estado_jogo["velocidade"] += 0.006
+        if estado_jogo["distancia"] >= 1000:
+            return "vitoria"
 
         desenhar_hud()
 
@@ -128,18 +142,61 @@ def tela_game_over():
         teclas = pygame.key.get_pressed()
         if teclas[pygame.K_RETURN]:
             return
+def tela_vitoria():
+    while True:
+        tela.fill((0, 120, 0))
 
+        texto = fonte.render("VOCE VENCEU! - ENTER", True, (255,255,255))
+        tela.blit(texto, (LARGURA//2 - 180, ALTURA//2))
+
+        pygame.display.flip()
+
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+
+        teclas = pygame.key.get_pressed()
+        if teclas[pygame.K_RETURN]:
+            return
 def menu():
-    opcoes = ["Iniciar", "Continuar"]
+    opcoes = ["Iniciar"]
+
     selecionado = 0
 
     while True:
-        tela.fill((20,20,20))
+        # fundo
+        if fundo_menu:
+            tela.blit(fundo_menu, (0,0))
+        else:
+            tela.fill((20,20,20))
 
+        # título
+        titulo = fonte.render("CAR RUNNER", True, (255,255,255))
+        tela.blit(titulo, (LARGURA//2 - titulo.get_width()//2, 100))
+
+        # opções
         for i, opcao in enumerate(opcoes):
-            cor = BRANCO if i == selecionado else (100,100,100)
+            if i == selecionado:
+                cor = (255,255,0)  # amarelo selecionado
+                escala = 1.2
+            else:
+                cor = (180,180,180)
+                escala = 1
+
             texto = fonte.render(opcao, True, cor)
-            tela.blit(texto, (LARGURA//2 - 80, 200 + i*50))
+
+            # efeito leve de "zoom"
+            texto = pygame.transform.scale(
+                texto,
+                (int(texto.get_width()*escala), int(texto.get_height()*escala))
+            )
+
+            tela.blit(texto, (LARGURA//2 - texto.get_width()//2, 250 + i*80))
+
+        # controles
+        controles = fonte_pequena.render("A/D - mover | ENTER - selecionar | ESC - sair", True, (200,200,200))
+        tela.blit(controles, (LARGURA//2 - controles.get_width()//2, 500))
 
         pygame.display.flip()
 
@@ -159,15 +216,15 @@ def menu():
             pygame.time.delay(150)
 
         if teclas[pygame.K_RETURN]:
+
             if opcoes[selecionado] == "Iniciar":
                 reiniciar_jogo()
                 resultado = loop_jogo()
-                if resultado == "fim":
-                    tela_game_over()
 
-            elif opcoes[selecionado] == "Continuar":
-                resultado = loop_jogo()
                 if resultado == "fim":
                     tela_game_over()
+                elif resultado == "vitoria":
+                    tela_vitoria()
+
 
 menu()
