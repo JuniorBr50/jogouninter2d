@@ -4,15 +4,18 @@ from inimigos import Inimigos
 pygame.init()
 pygame.mixer.init()
 
+# Sons
+som_vitoria = pygame.mixer.Sound("som&foto/Victory.wav")
 som_batida = pygame.mixer.Sound("som&foto/crash.mp3")
-
 pygame.mixer.music.load("som&foto/Long Away Home.wav")
 pygame.mixer.music.play(-1)
 
+# Tela
 LARGURA, ALTURA = 800, 600
 tela = pygame.display.set_mode((LARGURA, ALTURA))
-pygame.display.set_caption("Car Runner")
+pygame.display.set_caption("Beetle Sunset DEMO")
 
+# Faixas
 faixas = [
     LARGURA//2 - 140,
     LARGURA//2,
@@ -21,39 +24,51 @@ faixas = [
 
 inimigos = Inimigos(faixas)
 
-carro_img = pygame.image.load("som&foto/car.PNG").convert_alpha()
+# Imagens
+carro_img = pygame.image.load("som&foto/fuscaRosa.PNG").convert_alpha()
 carro_img = pygame.transform.scale(carro_img, (60, 120))
 
 try:
     fundo_img = pygame.image.load("som&foto/bg.png").convert()
-    fundo_img = pygame.transform.scale(fundo_img, (800, 600))
+    fundo_img = pygame.transform.scale(fundo_img, (LARGURA, ALTURA))
 except:
     fundo_img = None
+
 try:
-    fundo_menu = pygame.image.load("som&foto/capa_menu.png").convert()
-
-    # escala mantendo proporção
-    escala = ALTURA / fundo_menu.get_height()
-
-    fundo_menu = pygame.transform.scale(
-        fundo_menu,
-        (int(fundo_menu.get_width() * escala), ALTURA)
-    )
+    fundo_menu = pygame.image.load("som&foto/menu_iniciar.png").convert()
+    fundo_menu = pygame.transform.scale(fundo_menu, (LARGURA, ALTURA))
 except:
     fundo_menu = None
-relogio = pygame.time.Clock()
+try:
+    fundo_vitoria = pygame.image.load("som&foto/vitoria_fusca.png").convert()
+    fundo_vitoria = pygame.transform.scale(fundo_vitoria, (LARGURA, ALTURA))
+except:
+    fundo_vitoria = None
+try:
+    fundo_derrota = pygame.image.load("som&foto/gameover_fundo.png").convert()
+    fundo_derrota = pygame.transform.scale(fundo_derrota, (LARGURA, ALTURA))
+except:
+    fundo_derrota = None
+# Fontes
 fonte = pygame.font.Font("som&foto/Pixel Game.otf", 40)
 fonte_pequena = pygame.font.Font("som&foto/Pixel Game.otf", 25)
+fonte_titulo = pygame.font.Font("som&foto/Pixel Game.otf", 80)
 
+# Cores
 BRANCO = (255,255,255)
 PRETO = (0,0,0)
 CEU = (135,206,235)
 
+relogio = pygame.time.Clock()
+
+# Estado
 estado_jogo = {
     "jogador_x": LARGURA//2,
     "velocidade": 5,
     "distancia": 0
 }
+
+# -------------------------
 
 def reiniciar_jogo():
     estado_jogo["jogador_x"] = LARGURA//2
@@ -61,12 +76,18 @@ def reiniciar_jogo():
     estado_jogo["distancia"] = 0
     inimigos.lista = []
 
+# -------------------------
+
 def desenhar_jogador():
     tela.blit(carro_img, (estado_jogo["jogador_x"] - 30, ALTURA - 120))
+
+# -------------------------
 
 def desenhar_hud():
     texto = fonte.render(f"Distância: {int(estado_jogo['distancia'])}", True, PRETO)
     tela.blit(texto, (10,10))
+
+# -------------------------
 
 def loop_jogo():
     tempo_spawn = 0
@@ -114,7 +135,20 @@ def loop_jogo():
 
         estado_jogo["distancia"] += estado_jogo["velocidade"] * 0.1
         estado_jogo["velocidade"] += 0.006
+
         if estado_jogo["distancia"] >= 1000:
+            pygame.mixer.music.stop()
+            som_vitoria.play()
+
+            tempo_inicio = pygame.time.get_ticks()
+
+            while pygame.time.get_ticks() - tempo_inicio < 3000:
+                for evento in pygame.event.get():
+                    if evento.type == pygame.QUIT:
+                        pygame.quit()
+                        exit()
+
+            pygame.mixer.music.play(-1)  # só volta depois do som acabar
             return "vitoria"
 
         desenhar_hud()
@@ -126,77 +160,125 @@ def loop_jogo():
 
         pygame.display.flip()
 
+# -------------------------
+
 def tela_game_over():
-    while True:
-        tela.fill(PRETO)
-        texto = fonte.render("GAME OVER - ENTER", True, BRANCO)
-        tela.blit(texto, (LARGURA//2 - 170, ALTURA//2))
-
-        pygame.display.flip()
-
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-
-        teclas = pygame.key.get_pressed()
-        if teclas[pygame.K_RETURN]:
-            return
-def tela_vitoria():
-    while True:
-        tela.fill((0, 120, 0))
-
-        texto = fonte.render("VOCE VENCEU! - ENTER", True, (255,255,255))
-        tela.blit(texto, (LARGURA//2 - 180, ALTURA//2))
-
-        pygame.display.flip()
-
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-
-        teclas = pygame.key.get_pressed()
-        if teclas[pygame.K_RETURN]:
-            return
-def menu():
-    opcoes = ["Iniciar"]
-
-    selecionado = 0
-
+    tempo_piscar = 0
+    mostrar = True
     while True:
         # fundo
+        relogio.tick(60)
+
+        tempo_piscar += relogio.get_time()
+        if tempo_piscar > 500:
+            mostrar = not mostrar
+            tempo_piscar = 0
+        if fundo_derrota:
+            tela.blit(fundo_derrota, (0,0))
+        else:
+            tela.fill((20, 0, 0))  # vermelho escuro
+
+        # texto principal com sombra
+        texto = fonte.render("TENTE NOVAMENTE", True, (255,0,0))
+        sombra = fonte.render("TENTE NOVAMENTE", True, (0, 0, 0))
+
+        x = LARGURA//2 - texto.get_width()//2
+        y = ALTURA//2 - 50
+
+        if mostrar:
+            tela.blit(sombra, (x + 3, y + 3))
+            tela.blit(texto, (x, y))
+
+        # instrução
+        instrucao = fonte_pequena.render("PRESSIONE ENTER", True, (255,255,255))
+        tela.blit(instrucao, (LARGURA//2 - instrucao.get_width()//2, y + 80))
+
+        pygame.display.flip()
+
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+
+        if pygame.key.get_pressed()[pygame.K_RETURN]:
+            return
+# -------------------------
+
+def tela_vitoria():
+    pygame.mixer.music.play(-1)
+    tempo_piscar = 0
+    mostrar = True
+    while True:
+        # fundo
+        relogio.tick(60)
+
+        tempo_piscar += relogio.get_time()
+        if tempo_piscar > 500:
+            mostrar = not mostrar
+            tempo_piscar = 0
+        if fundo_vitoria:
+            tela.blit(fundo_vitoria, (0,0))
+        else:
+            tela.fill((0,120,0))
+
+        # texto com sombra (mais bonito)
+        sombra = fonte.render("VOCE VENCEU!", True, (0,0,0))
+        texto = fonte.render("VOCE VENCEU!", True, (255,255,255))
+
+        x = LARGURA//2 - texto.get_width()//2
+        y = ALTURA//2 - 50
+
+        if mostrar:
+            tela.blit(sombra, (x + 3, y + 3))
+            tela.blit(texto, (x, y))
+
+        # instrução
+        instrucao = fonte_pequena.render("PRESSIONE ENTER", True, (255,255,255))
+        tela.blit(instrucao, (LARGURA//2 - instrucao.get_width()//2, y + 80))
+
+        pygame.display.flip()
+
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+
+        if pygame.key.get_pressed()[pygame.K_RETURN]:
+            return
+
+# -------------------------
+
+def menu():
+    tempo_piscar = 0
+    mostrar = True
+
+    while True:
+        relogio.tick(60)
+
+        tempo_piscar += relogio.get_time()
+        if tempo_piscar > 500:
+            mostrar = not mostrar
+            tempo_piscar = 0
+
         if fundo_menu:
             tela.blit(fundo_menu, (0,0))
         else:
             tela.fill((20,20,20))
 
-        # título
-        titulo = fonte.render("CAR RUNNER", True, (255,255,255))
-        tela.blit(titulo, (LARGURA//2 - titulo.get_width()//2, 100))
+        # Título piscando
+        cor = (255, 0, 0) if mostrar else (0, 120, 255)
+        titulo = fonte_titulo.render("Beetle Sunset", True, cor)
+        tela.blit(titulo, (LARGURA//2 - titulo.get_width()//2, 80))
 
-        # opções
-        for i, opcao in enumerate(opcoes):
-            if i == selecionado:
-                cor = (255,255,0)  # amarelo selecionado
-                escala = 1.2
-            else:
-                cor = (180,180,180)
-                escala = 1
+        # Botão iniciar
+        cor = (255,0,0) if mostrar else (0,120,255)
+        texto = fonte.render("INICIAR", True, cor)
+        texto = pygame.transform.scale(texto, (int(texto.get_width()*1.2), int(texto.get_height()*1.2)))
+        tela.blit(texto, (LARGURA//2 - texto.get_width()//2, 250))
 
-            texto = fonte.render(opcao, True, cor)
-
-            # efeito leve de "zoom"
-            texto = pygame.transform.scale(
-                texto,
-                (int(texto.get_width()*escala), int(texto.get_height()*escala))
-            )
-
-            tela.blit(texto, (LARGURA//2 - texto.get_width()//2, 250 + i*80))
-
-        # controles
-        controles = fonte_pequena.render("A/D - mover | ENTER - selecionar | ESC - sair", True, (200,200,200))
-        tela.blit(controles, (LARGURA//2 - controles.get_width()//2, 500))
+        # Controles
+        controles = fonte.render("A/D - mover | ENTER - selecionar | ESC - sair", True, BRANCO)
+        tela.blit(controles, (LARGURA//2 - controles.get_width()//2, ALTURA - 50))
 
         pygame.display.flip()
 
@@ -207,24 +289,15 @@ def menu():
 
         teclas = pygame.key.get_pressed()
 
-        if teclas[pygame.K_UP]:
-            selecionado = (selecionado - 1) % len(opcoes)
-            pygame.time.delay(150)
-
-        if teclas[pygame.K_DOWN]:
-            selecionado = (selecionado + 1) % len(opcoes)
-            pygame.time.delay(150)
-
         if teclas[pygame.K_RETURN]:
+            reiniciar_jogo()
+            resultado = loop_jogo()
 
-            if opcoes[selecionado] == "Iniciar":
-                reiniciar_jogo()
-                resultado = loop_jogo()
+            if resultado == "fim":
+                tela_game_over()
+            elif resultado == "vitoria":
+                tela_vitoria()
 
-                if resultado == "fim":
-                    tela_game_over()
-                elif resultado == "vitoria":
-                    tela_vitoria()
-
+# -------------------------
 
 menu()

@@ -6,7 +6,7 @@ class Inimigos:
         self.faixas = faixas
         self.lista = []
 
-        self.imagem = pygame.image.load("som&foto/inimigo.png").convert_alpha()
+        self.imagem = pygame.image.load("som&foto/byd.PNG").convert_alpha()
         self.imagem = pygame.transform.scale(self.imagem, (60, 120))
 
     def gerar(self):
