@@ -20,8 +20,6 @@ class Telas:
 
         self.BRANCO = (255,255,255)
 
-    # -------------------------
-
     def menu(self):
         tempo_piscar = 0
         mostrar = True
@@ -70,7 +68,6 @@ class Telas:
             if pygame.key.get_pressed()[pygame.K_RETURN]:
                 return "iniciar"
 
-    # -------------------------
 
     def game_over(self):
         tempo_piscar = 0
@@ -105,8 +102,6 @@ class Telas:
 
             if pygame.key.get_pressed()[pygame.K_RETURN]:
                 return "menu"
-
-    # -------------------------
 
     def vitoria(self):
         inicio = pygame.time.get_ticks()

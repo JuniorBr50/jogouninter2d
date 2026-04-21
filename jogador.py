@@ -14,7 +14,6 @@ class Jogador:
         if teclas[pygame.K_d]:
             self.x += self.velocidade
 
-        # limites da pista
         limite_esq = self.largura_tela // 2 - 170
         limite_dir = self.largura_tela // 2 + 170
 
